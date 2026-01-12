@@ -38,3 +38,4 @@ An AI-powered conversational paper analysis plugin for Zotero 7, powered by Goog
 - **Change Model**: Click **🤖 Model** to switch between Gemini versions if you hit rate limits (429 errors).
 - **Clear Chat**: Click **🗑️ Clear Chat** to reset the conversation context.
 # zotero-paper-chat
+# zotero-paper-chat
