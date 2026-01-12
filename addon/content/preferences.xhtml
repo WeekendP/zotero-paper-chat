@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<!DOCTYPE window>
+
+<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:html="http://www.w3.org/1999/xhtml">
+
+  <groupbox>
+    <label>
+      <html:h2>Paper Chat Settings</html:h2>
+    </label>
+
+    <vbox class="pane-content" style="padding: 20px; min-width: 500px; min-height: 400px;">
+      <!-- API Key -->
+      <hbox align="center">
+        <label value="Gemini API Key:" style="width: 150px;" />
+        <html:input id="paper-chat-api-key" type="password" style="flex: 1; min-width: 300px;"
+          placeholder="Enter your Gemini API key" />
+      </hbox>
+
+      <description style="margin-left: 150px; color: #666; font-size: 11px;">
+        Get your API key from Google AI Studio: https://aistudio.google.com/apikey
+      </description>
+
+      <separator />
+
+      <!-- Model Selection -->
+      <hbox align="center">
+        <label value="Model:" style="width: 150px;" />
+        <menulist id="paper-chat-model">
+          <menupopup>
+            <menuitem label="Gemini 2.0 Flash (Recommended)" value="gemini-2.0-flash" />
+            <menuitem label="Gemini 1.5 Flash" value="gemini-1.5-flash" />
+            <menuitem label="Gemini 1.5 Pro" value="gemini-1.5-pro" />
+          </menupopup>
+        </menulist>
+      </hbox>
+
+      <separator />
+
+      <!-- History Length -->
+      <hbox align="center">
+        <label value="Max History:" style="width: 150px;" />
+        <html:input id="paper-chat-max-history" type="number" min="5" max="50" value="20" style="width: 80px;" />
+        <label value="messages" />
+      </hbox>
+
+      <separator />
+
+      <!-- System Prompt -->
+      <vbox>
+        <label value="System Prompt:" />
+        <html:textarea id="paper-chat-system-prompt" rows="4" style="width: 100%; margin-top: 5px;"
+          placeholder="Instructions for the AI assistant..." />
+      </vbox>
+
+      <separator />
+
+      <!-- Buttons -->
+      <hbox>
+        <button id="paper-chat-save" label="Save Settings" />
+        <button id="paper-chat-test" label="Test Connection" />
+      </hbox>
+
+      <description id="paper-chat-status" style="margin-top: 10px;" />
+    </vbox>
+  </groupbox>
+
+  <script type="application/javascript">
+  < ![CDATA[
+      (function () {
+        const doc = document;
+
+        // Load current settings
+        function loadSettings() {
+          const apiKey = Zotero.Prefs.get("extensions.zotero.paperchat.apiKey", true) || "";
+          const model = Zotero.Prefs.get("extensions.zotero.paperchat.model", true) || "gemini-2.0-flash";
+          const maxHistory = Zotero.Prefs.get("extensions.zotero.paperchat.maxHistoryLength", true) || 20;
+          const systemPrompt = Zotero.Prefs.get("extensions.zotero.paperchat.systemPrompt", true) ||
+            "You are a helpful research assistant analyzing academic papers. When referencing specific content, always mention the page number. Be concise but thorough.";
+
+          doc.getElementById("paper-chat-api-key").value = apiKey;
+          doc.getElementById("paper-chat-model").value = model;
+          doc.getElementById("paper-chat-max-history").value = maxHistory;
+          doc.getElementById("paper-chat-system-prompt").value = systemPrompt;
+        }
+
+        // Save settings
+        function saveSettings() {
+          const apiKey = doc.getElementById("paper-chat-api-key").value;
+          const model = doc.getElementById("paper-chat-model").value;
+          const maxHistory = parseInt(doc.getElementById("paper-chat-max-history").value, 10);
+          const systemPrompt = doc.getElementById("paper-chat-system-prompt").value;
+
+          Zotero.Prefs.set("extensions.zotero.paperchat.apiKey", apiKey, true);
+          Zotero.Prefs.set("extensions.zotero.paperchat.model", model, true);
+          Zotero.Prefs.set("extensions.zotero.paperchat.maxHistoryLength", maxHistory, true);
+          Zotero.Prefs.set("extensions.zotero.paperchat.systemPrompt", systemPrompt, true);
+
+          setStatus("Settings saved!", "green");
+        }
+
+        // Test API connection
+        async function testConnection() {
+          const apiKey = doc.getElementById("paper-chat-api-key").value;
+          if (!apiKey) {
+            setStatus("Please enter an API key first", "red");
+            return;
+          }
+
+          setStatus("Testing connection...", "blue");
+
+          try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+            const response = await fetch(url);
+
+            if (response.ok) {
+              setStatus("✓ Connection successful!", "green");
+            } else {
+              const error = await response.json();
+              setStatus("✗ " + (error.error?.message || "Connection failed"), "red");
+            }
+          } catch (e) {
+            setStatus("✗ " + e.message, "red");
+          }
+        }
+
+        function setStatus(text, color) {
+          const status = doc.getElementById("paper-chat-status");
+          status.textContent = text;
+          status.style.color = color;
+        }
+
+        // Setup event listeners
+        doc.getElementById("paper-chat-save").addEventListener("click", saveSettings);
+        doc.getElementById("paper-chat-test").addEventListener("click", testConnection);
+
+        // Load settings on open
+        loadSettings();
+      })();
+    ]]>
+  </script>
+</vbox>
