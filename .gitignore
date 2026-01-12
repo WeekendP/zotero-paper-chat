@@ -1,0 +1,11 @@
+# Zotero Plugin Build artifacts
+build/
+*.xpi
+.DS_Store
+
+# Logs
+*.log
+debuglog.rtf
+
+# OS overhead
+Thumbs.db
